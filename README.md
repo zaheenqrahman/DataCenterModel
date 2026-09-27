@@ -18,7 +18,7 @@ This project is built for exactly where we are right now, not for an ideal team:
   Calc 3, Diff Eq, and intro Python** — so that side stays at "Ohm's law and basic
   redundancy," not full power-systems engineering.
 - **Azure** is included because Zaheen is studying for **AZ-900 / AZ-104** — deploying
-  this project is real, graded practice for that, not an add-on.
+  this project is real building Infrastructure as Code and hybrid cloud deployment. 
 
 Everything past that (three-phase power, ACI's tenant/VRF/EPG model, ODE-based battery
 modeling) is listed as **stretch**, clearly separate from the core build. Do the core
