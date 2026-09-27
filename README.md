@@ -119,6 +119,31 @@ Never commit credentials. `GATEWAY_TOKEN` and any future APIC/Azure credentials 
 environment variables or a local `.env` (already in `.gitignore`), never in
 `data/inventory.yaml` or code.
 
+
+## Electrical Engineering Knowledge (POWER SYSTEMS)
+1. AC power fundamentals
+   - P (W) = V × I × PF (power factor) for AC; real power vs. apparent power (kW vs. kVA)
+   - Single-phase vs. three-phase power, and why data centers use three-phase for PDUs and switchgear
+   - Voltage drop over cable runs
+2. The power chain, top to bottom
+   Utility feed → generator (backup) → ATS (automatic transfer switch) → UPS → PDU → rack PDU (strip) → device PSU. Each stage has its own capacity and failure mode.
+3. Redundancy models
+   - N: just enough capacity, no spare
+   - N+1: one extra unit beyond what's needed
+   - 2N: fully duplicated path (this is what feed A/B in the repo models)
+   - Concurrent maintainability: can you service one path without dropping load?
+4. UPS and battery sizing
+   - Runtime at full load vs. partial load
+   - Double-conversion vs. line-interactive UPS
+   - Battery vs. flywheel vs. newer lithium-ion systems
+5. Circuit protection
+   - Breaker sizing and coordination (so a fault trips the nearest breaker, not the whole feed)
+   - Derating: NEC-style guidance to run circuits at about 80% of rated capacity for continuous load
+6. Cooling and power are linked
+   - PUE (Power Usage Effectiveness): total facility power ÷ IT power
+   - Heat output roughly follows power draw, so power planning and cooling planning are the same conversation
+7. Grounding and safety (less central to this project, but standard EE data center material): bonding, grounding grids, arc-flash considerations
+
 ## Authors
 
 Zaheen Rahman (network/ACI side) + power/electrical engineering partner Anas Shah
