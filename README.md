@@ -14,7 +14,7 @@ network-redundant devices that still share a single power point of failure.
 
 | Domain | Owner | Covers |
 |---|---|---|
-| **Power & electrical** | Partner | Feed/UPS capacity, PDU telemetry model, rack power budget, redundancy math (`gateway/risk.py`, `power_sim/`, `data/inventory.yaml` wattages) |
+| **Power & electrical** | Anas(EE student) | Feed/UPS capacity, PDU telemetry model, rack power budget, redundancy math (`gateway/risk.py`, `power_sim/`, `data/inventory.yaml` wattages) |
 | **Network / data center fabric** | Zaheen | CCNA baseline lab, fabric driver, golden-config compliance, CCNA→ACI construct mapping, Azure hybrid link |
 
 `data/inventory.yaml` is the handoff point between the two — both sides edit it.
