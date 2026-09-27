@@ -1,7 +1,7 @@
 # dc-resilience-twin
 
 **A network + power resilience simulator for a small data center — model it as one graph,
-break it on purpose, and see what actually survives.**
+break it on purpose if something happens like a cyber attack, natural disaster, and see what actually survives.**
 
 > **Status: brand new, nothing built yet.** This README describes the design. Everything
 > below is a plan until the roadmap checkboxes say otherwise.
