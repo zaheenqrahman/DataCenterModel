@@ -13,11 +13,11 @@ This project is built for exactly where we are right now, not for an ideal team:
 - **Zaheen** is studying for the **CCNA** and interviewing for a Cisco Data Center
   Consulting internship — so the networking side stays at CCNA level (no ACI, no
   advanced SDN). It's meant to show CCNA fundamentals applied, not a whole new platform.
-- **The power/electrical side** is a sophomore who's taken **Physics 2 (+ lab), Calc 2,
+- **The power/electrical side Anas Shah** is a sophomore who's taken **Physics 2 (+ lab), Calc 2,
   Calc 3, Diff Eq, and intro Python** — so that side stays at "Ohm's law and basic
   redundancy," not full power-systems engineering.
-- **Azure** is included because Zaheen is studying for **AZ-900 / AZ-104** — deploying
-  this project is real, graded practice for that, not an add-on.
+- **Azure** is included because Zaheen is studying for * Z-104** — deploying
+  this project is real, graded practice for that, not an add-on, also writing IAC and configuring Azure App Services is key
 
 Everything past that (three-phase power, ACI's tenant/VRF/EPG model, ODE-based battery
 modeling) is listed as **stretch**, clearly separate from the core build. Do the core
