@@ -1,33 +1,66 @@
-# datacenter-aci-blueprint
+# datacenter-aci-blueprint (PowerOps Gateway)
 
-**Legacy-to-ACI Migration Assessment** — build a traditional three-tier data center network, assess its configuration with Python, and map it to a Cisco ACI policy design.
+A **network + power** health and compliance API for a small Cisco data center lab, built with
+FastAPI. Two domains, one shared model: the network side (fabric, golden-config, CCNA/ACI
+mapping) and the power side (feeds, PDUs, redundancy risk) both read/write
+`data/inventory.yaml`, so a finding on one side can be checked against the other — for
+example, a device with network-level redundancy that still has a single power point of
+failure.
 
-> **Status: in progress.** Items below are marked `[ ]` (planned) or `[x]` (done). Update this as the project moves.
+**Headline check:** `/risk/scan` maps every device's PSU A/B to a power feed and flags
+network-redundant devices that still share a single power point of failure.
 
----
+## Who owns what
 
-## The problem
+| Domain | Owner | Covers |
+|---|---|---|
+| **Power & electrical** | Partner | Feed/UPS capacity, PDU telemetry model, rack power budget, redundancy math (`gateway/risk.py`, `power_sim/`, `data/inventory.yaml` wattages) |
+| **Network / data center fabric** | Zaheen | CCNA baseline lab, fabric driver, golden-config compliance, CCNA→ACI construct mapping, Azure hybrid link |
 
-A client runs a traditional data center network: VLANs, trunks, STP, OSPF, ACLs, and per-switch CLI configuration. They want to move to Cisco ACI, but first they need to know *what they have* and *what it becomes* in ACI. Doing this by hand across many devices is slow and error-prone.
+`data/inventory.yaml` is the handoff point between the two — both sides edit it.
 
-## What this project does
+## Status (honest)
 
-1. **Builds** a traditional core / distribution / access network in Cisco Packet Tracer using CCNA-level features.
-2. **Assesses** the exported device configs with Python and reports an inventory plus findings.
-3. **Maps** each traditional construct to its ACI equivalent and writes the proposed design as a YAML blueprint.
-4. **Checks** the blueprint's structure against a real APIC (read-only) using the Cisco DevNet ACI sandbox.
+| Piece | State |
+|---|---|
+| Power/redundancy risk scan | Working, driven by `data/inventory.yaml` |
+| PDU/UPS telemetry | **Simulated** (`power_sim/`), no real hardware |
+| API framework | FastAPI + uvicorn (migrated from an earlier Flask version) |
+| Fabric driver (NX-API/RESTCONF) | Not started (TODO) |
+| Golden-config compliance engine | Template only (`golden/golden_config.yaml`), no comparison logic yet |
+| CCNA baseline lab (Packet Tracer) | Not started |
+| CCNA → ACI construct mapping | Not started (see below) |
+| Azure hybrid link | Not started (TODO) |
+
+Wattages in the inventory are placeholders until replaced with Cisco datasheet / Cisco Power
+Calculator values.
+
+## Architecture
 
 ```
-Packet Tracer topology ──► exported configs ──► Python assessor ──► findings report
-                                                       │
-                                                       ▼
-                                             ACI blueprint (YAML)
-                                                       │
-                                                       ▼
-                                     read-only comparison with APIC sandbox
+                 ┌────────────────────┐
+                 │ data/inventory.yaml│  ← shared model (both roles edit)
+                 └─────────┬──────────┘
+                           │
+        ┌──────────────────┴──────────────────┐
+        ▼                                      ▼
+  Power domain                          Network domain
+  gateway/risk.py                       golden/golden_config.yaml
+  power_sim/pdu_api.py (simulated PDU)  fabric driver (NX-API/RESTCONF) [TODO]
+                                        CCNA lab → assessor → ACI mapping [TODO]
+        │                                      │
+        └──────────────┬───────────────────────┘
+                        ▼
+                 FastAPI app (application.py)
+           /power/racks  /power/feeds  /risk/scan
+           /fabric/devices  /fabric/devices/{name}/compliance  [planned]
 ```
 
-## Traditional → ACI mapping
+## Networking side: CCNA baseline → ACI mapping (planned)
+
+The network half of this project builds a traditional CCNA-level data center network,
+checks its config against `golden/golden_config.yaml`, and maps it to Cisco ACI constructs —
+the same way a real migration assessment would.
 
 | Traditional network | ACI equivalent |
 |---|---|
@@ -39,88 +72,53 @@ Packet Tracer topology ──► exported configs ──► Python assessor ─�
 | STP, EtherChannel, HSRP | Handled by the fabric (spine-leaf, vPC, anycast gateway) |
 | Per-switch CLI | APIC policy (REST / GUI) |
 
-## CCNA coverage
-
-| CCNA 200-301 domain | Where it appears |
+| CCNA 200-301 domain | Where it lands in this project |
 |---|---|
-| Network Fundamentals | Three-tier topology, cabling, subnetting plan with VLSM |
+| Network Fundamentals | Topology, subnetting/VLSM plan |
 | Network Access | VLANs, trunks, STP, EtherChannel |
-| IP Connectivity | OSPF, static routes, inter-VLAN routing |
-| IP Services | DHCP, NTP, NAT, SNMP, Syslog |
-| Security Fundamentals | ACLs, port security, DHCP snooping, SSH |
-| Automation and Programmability | Python config parser, YAML, JSON, REST calls to APIC |
+| IP Connectivity | OSPF, static routes |
+| IP Services | DHCP, NTP, SNMP, Syslog (already stubbed in `golden_config.yaml`) |
+| Security Fundamentals | ACLs, port security, SSH |
+| Automation and Programmability | Fabric driver, golden-config diff, ACI blueprint YAML |
 
-## Repository layout (planned)
+The ACI comparison step will use the read-only Cisco DevNet ACI Always-On sandbox — no write
+access assumed.
+
+## Endpoints (all except `/` need header `X-API-Token: $GATEWAY_TOKEN`)
+
+| Endpoint | Purpose | Status |
+|---|---|---|
+| `GET /` | Health | Working |
+| `GET /power/racks` | Typical/peak kW per rack | Working |
+| `GET /power/feeds` | Load per feed | Working |
+| `GET /risk/scan` | Redundancy and capacity findings | Working |
+| `GET /fabric/devices` | Device inventory from the fabric | Planned |
+| `GET /fabric/devices/{name}/compliance` | Compare live config to `golden_config.yaml` | Planned |
+
+## Run
 
 ```
-datacenter-aci-blueprint/
-├── README.md
-├── topology/          # Packet Tracer file, diagram, addressing + VLAN plan
-├── configs/           # exported running-configs, one file per device
-├── assessor/          # Python parser and findings rules
-├── blueprint/         # generated ACI blueprint YAML
-├── apic/              # read-only APIC sandbox client and comparison
-├── reports/           # sample findings report
-└── docs/              # design notes, slides
+py -m pip install -r requirements.txt
+set GATEWAY_TOKEN=devtoken
+uvicorn application:app --reload
+py -m pytest tests -v
 ```
 
-## Findings the assessor will report (planned)
+Interactive API docs (Swagger UI) are served at `/docs`. The simulated PDU API runs
+separately: `uvicorn power_sim.pdu_api:app --port 5001`.
 
-- ACL that permits any traffic between tiers
-- VLAN with no gateway (SVI) defined
-- No STP root explicitly configured
-- SSH not enabled / Telnet allowed on VTY lines
-- No NTP or Syslog server configured
-- Trunk allowing all VLANs
-- OSPF interface not passive where it should be
+## Layout
 
-## Getting started
+`application.py` API · `gateway/risk.py` power/redundancy checks · `power_sim/` mock PDU API
+· `golden/` fabric golden config · `data/` shared inventory (network + power) · `tests/` ·
+`docs/`
 
-**Requirements**
-- Python 3.10+
-- Cisco Packet Tracer (to open the topology)
-- A Cisco DevNet account for the ACI sandbox (read-only part)
+## Secrets
 
-**Setup**
-```bash
-git clone <repo-url>
-cd datacenter-aci-blueprint
-python -m venv .venv
-.venv\Scripts\activate        # Windows
-pip install -r requirements.txt
-```
+Never commit credentials. `GATEWAY_TOKEN` and any future APIC/Azure credentials go in
+environment variables or a local `.env` (already in `.gitignore`), never in
+`data/inventory.yaml` or code.
 
-**Run the assessor** *(once implemented)*
-```bash
-python -m assessor configs/ --report reports/findings.md
-python -m assessor configs/ --blueprint blueprint/aci_blueprint.yaml
-```
+## Authors
 
-**Secrets:** never commit credentials. Sandbox credentials go in environment variables (`APIC_URL`, `APIC_USER`, `APIC_PASSWORD`) or a local `.env` file that is listed in `.gitignore`.
-
-## Roadmap
-
-- [ ] Learn ACI basics (tenant, VRF, BD, EPG, contract)
-- [ ] Addressing and VLAN plan
-- [ ] Packet Tracer topology: VLANs, trunks, inter-VLAN routing
-- [ ] OSPF, HSRP, EtherChannel, STP
-- [ ] ACLs, DHCP, NTP, Syslog, SSH, port security
-- [ ] Export configs
-- [ ] Python parser and findings report
-- [ ] ACI blueprint YAML generator
-- [ ] Read-only APIC sandbox comparison
-- [ ] Slides and demo rehearsal
-
-## Limitations
-
-- The traditional network is a Packet Tracer simulation, not production hardware.
-- The APIC sandbox is used **read-only**; the tool does not push configuration.
-- The mapping covers the common constructs listed above, not every ACI feature.
-
-## Related work
-
-**NetOps Gateway** — a separate project: a Flask REST API over the Cisco Meraki API for network health and compliance checks. This project is the design and migration side; NetOps Gateway is the monitoring side.
-
-## Author
-
-Zaheen Rahman
+Zaheen Rahman (network/ACI side) + power/electrical engineering partner Anas Shah
