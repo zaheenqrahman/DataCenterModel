@@ -1,165 +1,124 @@
-# dc-resilience-twin
+# datacenter-aci-blueprint (PowerOps Gateway)
 
-**A network + power resilience simulator for a small data center — model it as one graph,
-break it on purpose, and see what actually survives.**
+A **network + power** health and compliance API for a small Cisco data center lab, built with
+FastAPI. Two domains, one shared model: the network side (fabric, golden-config, CCNA/ACI
+mapping) and the power side (feeds, PDUs, redundancy risk) both read/write
+`data/inventory.yaml`, so a finding on one side can be checked against the other — for
+example, a device with network-level redundancy that still has a single power point of
+failure.
 
-> **Status: brand new, nothing built yet.** This README describes the design. Everything
-> below is a plan until the roadmap checkboxes say otherwise.
+**Headline check:** `/risk/scan` maps every device's PSU A/B to a power feed and flags
+network-redundant devices that still share a single power point of failure.
 
-## Why this project, and not another health-check API
+## Who owns what
 
-It's easy to keep building the same shape of project: pull some state, run rule checks,
-return a findings list as JSON. That's useful, but it only ever answers *"is this
-compliant right now?"* This project asks a different question instead:
+| Domain | Owner | Covers |
+|---|---|---|
+| **Power & electrical** | Partner | Feed/UPS capacity, PDU telemetry model, rack power budget, redundancy math (`gateway/risk.py`, `power_sim/`, `data/inventory.yaml` wattages) |
+| **Network / data center fabric** | Zaheen | CCNA baseline lab, fabric driver, golden-config compliance, CCNA→ACI construct mapping, Azure hybrid link |
 
-> **"If this one thing fails, what actually goes down — and did we already have a hidden
-> single point of failure we didn't know about?"**
+`data/inventory.yaml` is the handoff point between the two — both sides edit it.
 
-A device can look network-redundant (two uplinks) and power-redundant (two PSUs)
-separately, and still share one hidden common failure point — the same rack PDU, the same
-spine switch, the same feed — that only shows up once the network graph and the power
-graph are modeled *together* and something is actually removed from both at once. That's
-the insight this project is built to surface.
+## Status (honest)
 
-## The idea, in one picture
+| Piece | State |
+|---|---|
+| Power/redundancy risk scan | Working, driven by `data/inventory.yaml` |
+| PDU/UPS telemetry | **Simulated** (`power_sim/`), no real hardware |
+| API framework | FastAPI + uvicorn (migrated from an earlier Flask version) |
+| Fabric driver (NX-API/RESTCONF) | Not started (TODO) |
+| Golden-config compliance engine | Template only (`golden/golden_config.yaml`), no comparison logic yet |
+| CCNA baseline lab (Packet Tracer) | Not started |
+| CCNA → ACI construct mapping | Not started (see below) |
+| Azure hybrid link | Not started (TODO) |
 
-```
-Nodes:  spine1, spine2, leaf1, leaf2, srv1, srv2, feedA, feedB, pdu1, pdu2...
-Edges:  network links   (leaf1 —— spine1, leaf1 —— spine2, ...)
-        power links      (leaf1 —— PSU-A —— feedA, leaf1 —— PSU-B —— feedB, ...)
-
-Simulate:  "remove feedA"   or   "remove spine1"   or   "remove pdu1"
-
-For every surviving device, check:
-  - network reachability to the core   (graph connectivity, network edges only)
-  - power delivery                     (graph connectivity, power edges only)
-
-Report:  which devices lost BOTH at once — the real single point of failure —
-         vs. devices that lost only one and are still limping along fine.
-```
+Wattages in the inventory are placeholders until replaced with Cisco datasheet / Cisco Power
+Calculator values.
 
 ## Architecture
 
 ```
-data/topology.yaml ──► graph builder (NetworkX) ──► two-layer graph
-                                                       (network edges + power edges,
-                                                        same node set)
-                                                              │
-                                             failure simulation engine
-                                        (remove a node/edge, re-check connectivity
-                                         on each layer independently)
-                                                              │
-                                    ┌─────────────────────────┴─────────────────────┐
-                                    ▼                                               ▼
-                         resilience report (text/JSON)                topology visualization
-                         - devices that lost both layers               (before/after, color-coded
-                         - resilience score per scenario                 by what's still alive)
+                 ┌────────────────────┐
+                 │ data/inventory.yaml│  ← shared model (both roles edit)
+                 └─────────┬──────────┘
+                           │
+        ┌──────────────────┴──────────────────┐
+        ▼                                      ▼
+  Power domain                          Network domain
+  gateway/risk.py                       golden/golden_config.yaml
+  power_sim/pdu_api.py (simulated PDU)  fabric driver (NX-API/RESTCONF) [TODO]
+                                        CCNA lab → assessor → ACI mapping [TODO]
+        │                                      │
+        └──────────────┬───────────────────────┘
+                        ▼
+                 FastAPI app (application.py)
+           /power/racks  /power/feeds  /risk/scan
+           /fabric/devices  /fabric/devices/{name}/compliance  [planned]
 ```
 
-An optional thin FastAPI layer can expose `POST /simulate/{node}` later, but the core
-deliverable is the graph model and the simulation engine, not an API.
+## Networking side: CCNA baseline → ACI mapping (planned)
 
-## Who works on what
+The network half of this project builds a traditional CCNA-level data center network,
+checks its config against `golden/golden_config.yaml`, and maps it to Cisco ACI constructs —
+the same way a real migration assessment would.
 
-| | Electrical Engineering | Computer Science / Networking |
+| Traditional network | ACI equivalent |
+|---|---|
+| VLAN | EPG (with a Bridge Domain) |
+| SVI (gateway IP) | Bridge Domain subnet |
+| VRF / global routing table | VRF |
+| ACL between VLANs | Contract + filter |
+| OSPF to the outside | L3Out |
+| STP, EtherChannel, HSRP | Handled by the fabric (spine-leaf, vPC, anycast gateway) |
+| Per-switch CLI | APIC policy (REST / GUI) |
+
+| CCNA 200-301 domain | Where it lands in this project |
+|---|---|
+| Network Fundamentals | Topology, subnetting/VLSM plan |
+| Network Access | VLANs, trunks, STP, EtherChannel |
+| IP Connectivity | OSPF, static routes |
+| IP Services | DHCP, NTP, SNMP, Syslog (already stubbed in `golden_config.yaml`) |
+| Security Fundamentals | ACLs, port security, SSH |
+| Automation and Programmability | Fabric driver, golden-config diff, ACI blueprint YAML |
+
+The ACI comparison step will use the read-only Cisco DevNet ACI Always-On sandbox — no write
+access assumed.
+
+## Endpoints (all except `/` need header `X-API-Token: $GATEWAY_TOKEN`)
+
+| Endpoint | Purpose | Status |
 |---|---|---|
-| **Owns in this repo** | Power subgraph data: feeds, PDUs, UPS, dual-PSU wiring, realistic wattages | Network subgraph data: topology, links, spine-leaf design; the simulation engine and graph logic |
-| **Core knowledge needed** | Redundancy models (N, N+1, 2N) — this *is* a graph-connectivity question on the power layer; Ohm's law/circuit basics you already have from Physics 2 | Graph theory basics: nodes, edges, connectivity, BFS/DFS (new, but small — NetworkX does the heavy lifting) |
-| **Stretch** | Model a UPS/battery failure as time-dependent, not just on/off (uses Diff Eq) | Map network nodes to CCNA/ACI concepts (spine-leaf, VRF, EPG) for the consulting narrative |
-| **Shared** | The `data/topology.yaml` schema, Python fundamentals, Git/GitHub, reading the resilience report together | |
+| `GET /` | Health | Working |
+| `GET /power/racks` | Typical/peak kW per rack | Working |
+| `GET /power/feeds` | Load per feed | Working |
+| `GET /risk/scan` | Redundancy and capacity findings | Working |
+| `GET /fabric/devices` | Device inventory from the fabric | Planned |
+| `GET /fabric/devices/{name}/compliance` | Compare live config to `golden_config.yaml` | Planned |
 
-Same split philosophy as before: neither side needs to master the other's domain, the
-shared data file is where the two meet.
+## Run
 
-## Data model (planned: `data/topology.yaml`)
-
-```yaml
-devices:
-  - {name: spine1, role: spine}
-  - {name: leaf1,  role: leaf}
-  - {name: srv1,   role: server}
-
-network_links:
-  - [leaf1, spine1]
-  - [leaf1, spine2]
-
-power:
-  feeds:
-    A: {capacity_kw: 8.0}
-    B: {capacity_kw: 8.0}
-  psu_links:              # which device's PSU connects to which feed
-    - {device: leaf1, psu: A, feed: A}
-    - {device: leaf1, psu: B, feed: B}
+```
+py -m pip install -r requirements.txt
+set GATEWAY_TOKEN=devtoken
+uvicorn application:app --reload
+py -m pytest tests -v
 ```
 
-This is a superset of the `inventory.yaml` idea from the PowerOps Gateway project — same
-spirit (network and power described in one file), extended with explicit network links
-so the graph has edges to simulate, not just wattage numbers.
+Interactive API docs (Swagger UI) are served at `/docs`. The simulated PDU API runs
+separately: `uvicorn power_sim.pdu_api:app --port 5001`.
 
-## What "resilience score" means here
+## Layout
 
-For each simulated failure, the report gives:
-- **Devices unaffected** — kept both network and power connectivity
-- **Devices degraded** — lost one layer (still up, but no longer redundant)
-- **Devices down** — lost both layers, or lost their only path in a layer
-- **Hidden single points of failure** — devices that looked fully redundant on paper
-  but go fully down together under one simulated failure
-
-## Getting started (planned)
-
-**Requirements**
-- Python 3.10+
-- `networkx`, `matplotlib` (or `graphviz`), `pyyaml`, `pytest`
-
-```bash
-git clone <repo-url>
-cd dc-resilience-twin
-python -m venv .venv
-.venv\Scripts\activate        # Windows
-pip install -r requirements.txt
-```
-
-**Run a simulation** *(once implemented)*
-```bash
-python -m twin simulate --topology data/topology.yaml --remove feedA
-python -m twin simulate --topology data/topology.yaml --remove spine1 --draw
-```
-
-## Roadmap
-
-- [ ] Learn NetworkX basics (build a graph, check connectivity, remove a node)
-- [ ] Design `data/topology.yaml` schema (network side + power side together)
-- [ ] Build the graph from the YAML (two edge types, one node set)
-- [ ] Failure simulation: remove a node or edge, re-check connectivity per layer
-- [ ] Resilience report: unaffected / degraded / down / hidden single points of failure
-- [ ] Topology visualization: before/after, color-coded by survival
-- [ ] Seed a deliberate hidden single point of failure in the sample data, to prove the tool catches it
-- [ ] *(stretch)* Time-dependent UPS/battery failure model (ODE-based)
-- [ ] *(stretch)* Thin FastAPI wrapper: `POST /simulate/{target}`
-- [ ] Slides and demo rehearsal
-
-## Limitations
-
-- This is a simulation over a modeled topology, not live telemetry from real hardware.
-- Connectivity checks are structural (graph reachability), not a full physical power-flow
-  or network-protocol-timing model.
-- The consulting/ACI framing (mapping nodes to spine-leaf, VRF, EPG concepts) is
-  presentation-layer — the simulator itself is platform-agnostic.
-
-## Related work
-
-**PowerOps Gateway** (`datacenter-aci-blueprint` repo) — a separate, already-in-progress
-project: a FastAPI health/compliance API over a similar shared network+power inventory
-model. That project asks "is this compliant right now?"; this one asks "what breaks if
-this fails?" They could eventually share a data schema, but are built and delivered
-separately.
+`application.py` API · `gateway/risk.py` power/redundancy checks · `power_sim/` mock PDU API
+· `golden/` fabric golden config · `data/` shared inventory (network + power) · `tests/` ·
+`docs/`
 
 ## Secrets
 
-No credentials are needed for the core simulator (it runs on local YAML data). If a live
-telemetry source is added later, credentials go in environment variables or a
-`.gitignore`d `.env` file — never in `data/topology.yaml` or committed code.
+Never commit credentials. `GATEWAY_TOKEN` and any future APIC/Azure credentials go in
+environment variables or a local `.env` (already in `.gitignore`), never in
+`data/inventory.yaml` or code.
 
 ## Authors
 
-Zaheen Rahman (network/graph side) + power/electrical engineering partner Anas Shah
+Zaheen Rahman (network/ACI side) + power/electrical engineering partner Anas Shah
