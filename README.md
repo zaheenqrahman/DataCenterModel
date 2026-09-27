@@ -1,7 +1,8 @@
 # dc-resilience-twin
 
 **A small tool that maps a data center's network and its power together, then simulates
-"what if this one thing breaks?"**
+"what if this one thing breaks?"** and how Power Engineers have to work with Network Engineers to keep a data center up and running
+especially after an incident like a cyber attack, powergrid outage, natural disaster and etc. 
 
 > **Status: brand new, nothing built yet.** This README is the plan. Roadmap checkboxes
 > say what's actually done.
