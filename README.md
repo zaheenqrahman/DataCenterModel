@@ -119,30 +119,106 @@ Never commit credentials. `GATEWAY_TOKEN` and any future APIC/Azure credentials 
 environment variables or a local `.env` (already in `.gitignore`), never in
 `data/inventory.yaml` or code.
 
+Phase 0 — Foundations (both of you, Day 1)
 
-## Electrical Engineering Knowledge (POWER SYSTEMS)
-1. AC power fundamentals
-   - P (W) = V × I × PF (power factor) for AC; real power vs. apparent power (kW vs. kVA)
-   - Single-phase vs. three-phase power, and why data centers use three-phase for PDUs and switchgear
-   - Voltage drop over cable runs
-2. The power chain, top to bottom
-   Utility feed → generator (backup) → ATS (automatic transfer switch) → UPS → PDU → rack PDU (strip) → device PSU. Each stage has its own capacity and failure mode.
-3. Redundancy models
-   - N: just enough capacity, no spare
-   - N+1: one extra unit beyond what's needed
-   - 2N: fully duplicated path (this is what feed A/B in the repo models)
-   - Concurrent maintainability: can you service one path without dropping load?
-4. UPS and battery sizing
-   - Runtime at full load vs. partial load
-   - Double-conversion vs. line-interactive UPS
-   - Battery vs. flywheel vs. newer lithium-ion systems
-5. Circuit protection
-   - Breaker sizing and coordination (so a fault trips the nearest breaker, not the whole feed)
-   - Derating: NEC-style guidance to run circuits at about 80% of rated capacity for continuous load
-6. Cooling and power are linked
-   - PUE (Power Usage Effectiveness): total facility power ÷ IT power
-   - Heat output roughly follows power draw, so power planning and cooling planning are the same conversation
-7. Grounding and safety (less central to this project, but standard EE data center material): bonding, grounding grids, arc-flash considerations
+┌─────┬───────────────────────────────────────────────────┬───────┬────────────────────────────────────────────┐
+│  #  │                       Skill                       │ Owner │                  Have it?                  │
+├─────┼───────────────────────────────────────────────────┼───────┼────────────────────────────────────────────┤
+│ 1   │ Git/GitHub (clone, branch, commit, push, PR)      │ Both  │ Check — needed to collaborate on this repo │
+├─────┼───────────────────────────────────────────────────┼───────┼────────────────────────────────────────────┤
+│ 2   │ Python basics (dicts, lists, functions, file I/O) │ Both  │ Have (Intro Python)                        │
+├─────┼───────────────────────────────────────────────────┼───────┼────────────────────────────────────────────┤
+│ 3   │ Reading/writing YAML                              │ Both  │ New, but 15 minutes                        │
+├─────┼───────────────────────────────────────────────────┼───────┼────────────────────────────────────────────┤
+│ 4   │ REST API concepts (GET/POST, JSON, status codes)  │ Both  │ You have this from NetOps Gateway          │
+└─────┴───────────────────────────────────────────────────┴───────┴────────────────────────────────────────────┘
+
+Phase 1 — Power domain (partner)
+
+┌─────┬───────────────────────────────────────────────────────────────────────────┬────────────────────────────────────────────┐
+│  #  │                                   Skill                                   │                  Have it?                  │
+├─────┼───────────────────────────────────────────────────────────────────────────┼────────────────────────────────────────────┤
+│ 5   │ Ohm's law, P = VI, P = I²R                                                │ Have (Physics 2)                           │
+├─────┼───────────────────────────────────────────────────────────────────────────┼────────────────────────────────────────────┤
+│ 6   │ Series/parallel circuit analysis                                          │ Have (Physics 2 lab)                       │
+├─────┼───────────────────────────────────────────────────────────────────────────┼────────────────────────────────────────────┤
+│ 7   │ Kirchhoff's current/voltage laws                                          │ Have                                       │
+├─────┼────
+├─────┼───────────────────────────────────────────────────────────────────────────┼────────────────────────────────────────────┤
+│ 10  │ Energy vs. power (E = ∫P dt) for UPS runtime                              │ Have the math (Calc 2)                     │
+├─────┼───────────────────────────────────────────────────────────────────────────┼────────────────────────────────────────────┤
+│ 11  │ AC power factor, real vs. apparent power (kW vs. kVA)                     │ New                                        │
+├─────┼───────────────────────────────────────────────────────────────────────────┼────────────────────────────────────────────┤
+│ 12  │ Three-phase power                                                         │ New, small addition once #11 lands         │
+├─────┼───────────────────────────────────────────────────────────────────────────┼────────────────────────────────────────────┤
+│ 13  │ (stretch) Battery discharge as a first-order ODE, solved numerically in   │ Have the math (Diff Eq); new to apply it   │
+│     │ Python                                                                    │ here                                       │
+└─────┴───────────────────────────────────────────────────────────────────────────┴────────────────────────────────────────────┘
+
+Phase 2 — Networking / CCNA foundation (you)
+
+┌─────┬────────────────────────────────────────┬──────────┐
+│  #  │                 Skill                  │ CCNA ch. │
+├─────┼────────────────────────────────────────┼──────────┤
+│ 14  │ OSI model & TCP/IP                     │ 3        │
+├─────┼────────────────────────────────────────┼──────────┤
+│ 15  │ Subnetting & VLSM                      │ 13–15    │
+├─────┼────────────────────────────────────────┼──────────┤
+│ 16  │ VLANs & trunking                       │ 16–18    │
+├─────┼────────────────────────────────────────┼──────────┤
+│ 17  │ Spanning Tree & EtherChannel           │ 20–23    │
+├─────┼─────
+│ 19  │ HSRP / FHRP                            │ 29       │
+├─────┼────────────────────────────────────────┼──────────┤
+│ 20  │ ACLs                                   │ 34–35    │
+├─────┼────────────────────────────────────────┼──────────┤
+│ 21  │ DHCP, NTP, SNMP, Syslog, SSH           │ 37–42    │
+├─────┼────────────────────────────────────────┼──────────┤
+│ 22  │ Building the topology in Packet Tracer │ —        │
+└─────┴────────────────────────────────────────┴──────────┘
+
+Phase 3 — Network automation & ACI (you)
+
+┌─────┬──────────────────────────────────────────────────────────────────────────────┐
+│  #  │                                    Skill                                     │
+├─────┼──────────────────────────────────────────────────────────────────────────────┤
+│ 23  │ Parsing Cisco configs in Python (regex, or ciscoconfparse)                   │
+├─────┼──────────────────────────────────────────────────────────────────────────────┤
+│ 24  │ Writing the golden-config diff logic (live config vs. golden_config.yaml)    │
+├─────┼──────────────────────────────────────────────────────────────────────────────┤
+│ 25  │ ACI fundamentals: tenant, VRF, BD, EPG, contract                             │
+├─────┼──────────────────────────────────────────────────────────────────────────────┤
+│ 26  │ Authenticating to APIC / DevNet ACI sandbox                                  │
+├─────┼──────────────────────────────────────────────────────────────────────────────┤
+│ 27  │ Mapping CCNA constructs to ACI constructs, and generating the blueprint YAML │
+└─────┴──────
+┌─────┬───────────────────────────────────────────────────────────────────┬───────────────────────────────────────┐
+│  #  │                               Skill                               │                 Owner                 │
+├─────┼───────────────────────────────────────────────────────────────────┼───────────────────────────────────────┤
+│ 28  │ FastAPI (routes, dependencies, auth header)                       │ Both — already migrated in the repo   │
+├─────┼───────────────────────────────────────────────────────────────────┼───────────────────────────────────────┤
+│ 29  │ pytest (writing and running tests)                                │ Both                                  │
+├─────┼───────────────────────────────────────────────────────────────────┼───────────────────────────────────────┤
+│ 30  │ Designing the shared inventory.yaml schema together               │ Both                                  │
+├─────┼───────────────────────────────────────────────────────────────────┼───────────────────────────────────────┤
+│ 31  │ Cross-domain risk logic (network redundancy vs. power redundancy) │ Both — risk.py is the working example │
+├─────┼───────────────────────────────────────────────────────────────────┼───────────────────────────────────────┤
+│ 32  │ Azure basics (App Service, Key Vault) for the hybrid link         │ You (stretch)                         │
+├─────┼───────────────────────────────────────────────────────────────────┼───────────────────────────────────────┤
+│ 33  │ CI basics (GitHub Actions running pytest on push)                 │ Either (stretch)                      │
+└─────┴───────────────────────────────────────────────────────────────────┴───────────────────────────────────────┘
+
+Phase 5 — Close it out (both)
+
+┌─────┬──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  #  │                                              Skill                                               │
+├─────┼──────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 34  │ Writing docs/README so status is always honest (done vs. planned)                                │
+├─────┼──────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 35  │ A MOP-style change document (steps + rollback) if you add the deploy layer                       │
+├─────┼──────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 36  │ The consulting narrative: business problem → design → demo → value, for slides and the interview │
+└─────┴──────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 ## Authors
 
