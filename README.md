@@ -170,6 +170,7 @@ Day 2 — Finish data/topology.yaml
 - [ ] Parse the YAML into a plain adjacency-list graph with two edge types (network
       link, power link), same node set — *Zaheen*
 - [ ] Quick script/test that loads it and prints node/edge counts — *Anas Shah*
+- [ ] Map out Cisco Packet Tracer (devices) connected and simulate their errors through their failures (cyberattack, nature disaster, shutdown, etc).
 
 **Day 4 — Failure simulation**
 - [ ] Remove a node or link, recheck the network layer: still has a path to the internet
