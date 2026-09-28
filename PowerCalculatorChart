@@ -1,0 +1,45 @@
+=== C9300-24H(1100W-P) ===
+	Cisco Power Calculator - Power Results					
+	Disclaimer: The Cisco Power Calculator is intended to be an educational resource and a starting point in planning your power requirement; it is not a final recommendation from Cisco.This tool does not check for software compatibility.To determine the power requirements and software most appropriate for your company we suggest you work with a Cisco representative, Cisco channel partner or a solutions provider.					
+Power Consumption/Heat Dissipation Summary						
+Selected Product	Percentage of 
+ PoE Power used	Total PoE Output
+Power Available
+(W)	Total PoE Output
+Power Used
+(W)	Total PoE Output
+Power Remaining
+(W)	Typical Power Consumption(W)	Total Heat Dissipation At Maximum Power
+(BTU/Hr)
+C9300-24H(1100W-P)	0.00	830.0	0.00	830.0	116.0	909.87
+Switch Details						
+Selected Product	Typical Switch Power Consumption 
+ (with no PoE Devices)	Heat Dissipation At Typical
+(BTU/Hr)	Maximum Switch Power Consumption 
+ (with no PoE Devices)	Heat Dissipation At Maximum
+(BTU/Hr)		
+C9300-24H(1100W-P)	116.0	439.77	240.0	909.87		
+Quick Facts						
+Selected Product	C9300-24H(1100W-P)					
+Product Description	Stackable 24 10/100/1000 Ethernet UPoE+ ports, with 1100W AC Platinum power supply					
+Rack Unit	1					
+Input Voltage	115/230V					
+Available Ports	24					
+Power Supply Options	Available Second Power Supply Options 
+PWR-C1-350WAC-P=
+PWR-C1-715WAC-P=
+PWR-C1-1100WAC-P=					
+NOTE:
+1. The Power Calculator attempts to provide the power budget rules employed in the latest software releases. It does not account for changes in the power management software made in previous versions. Please consult the power management section of the Release Notes for a history of changes to the software power management operation.
+2. Typical Power is measured at 100% full port traffic
+3. Typical power draw is about 30% lower than the maximum value shown and is close to the actual power draw. Maximum values are based on theoretical calculations and should be used for facility power and cooling capacity planning. Also note that most of power allocated for PoE devices is dissipated at the end points and not at the switch.
+4. You have not Selected any Poe Devices
+						
+Power Supply Details						
+Second Power Supply Options	Percentage of Power Used	Total available PoE power for this PSU combination
+(W)	Total Output Power Used
+(W)	Total Output Power Remaining
+(W)		
+PWR-C1-350WAC-P=	0.00	1180	0.00	1180		
+PWR-C1-715WAC-P=	0.00	1545	0.00	1545		
+PWR-C1-1100WAC-P=	0.00	1930	0.00	1930		
