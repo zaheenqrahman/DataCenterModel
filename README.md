@@ -1,18 +1,17 @@
 # DC-Resilience-Twin/Model
 
-**A small tool that maps a data center's network and its power together, then simulates
+**A model/reflection that maps a data center's network and its power together, then simulates
 "what if this one thing breaks?"**
 
-> **Status: brand new, nothing built yet.** This README is the plan. Roadmap checkboxes
-> say what's actually done.
 
-## Scope, on purpose
+## Scope
 
 This project is built for exactly where we are right now, not for an ideal team:
 
 - **Zaheen** is studying for the **CCNA** and interviewing for a Cisco Data Center
   Consulting internship — so the networking side stays at CCNA level (no ACI, no
-  advanced SDN). It's meant to show CCNA fundamentals applied, not a whole new platform.
+  advanced SDN). It's meant to show CCNA fundamentals applied, not a whole new platform
+  alongside automation, hybrid cloud deployment and APIs. 
 - **The power/electrical side** is a sophomore who's taken **Physics 2 (+ lab), Calc 2,
   Calc 3, Diff Eq, and intro Python** — so that side stays at "Ohm's law and basic
   redundancy," not full power-systems engineering.
@@ -25,24 +24,25 @@ first. It's still a real, working project without any of the stretch items.
 
 ## What it actually does (core version)
 
-1. Describe a small data center in one YAML file: which switches connect to which
+1. Describe a small data center in one merged power and network
+   YAML file: which switches connect to which
    (network side), and which devices plug into which power feed (power side).
-2. Turn that into a simple graph: devices are dots, network cables and power cables are
-   both lines connecting them.
-3. Pick something to "break" — a switch, a feed, a link.
-4. For every other device, check two things: **does it still reach the network?** and
-   **does it still have power?**
-5. Report the interesting case: a device that looked fully backed up (two network paths,
+3. Turn that into a simple graph: devices are dots, network cables and power cables are
+   both lines connecting them. Map it out physically in Packet Tracer + draw.io.
+4. Pick something to "break" — a switch, a feed, a link, even all of these.
+5. For every other device, check two things: **does it still reach the network?** and
+   **does it still have power?**, CHECK BOTH. 
+6. Report the interesting case: a device that looked fully backed up (two network paths,
    two power feeds) but loses *both* at once, because its two "backups" secretly shared
    the same failure point.
-6. Draw a simple before/after picture of the network, colored by what survived.
+7. Draw a simple before/after picture of the network, colored by what survived and what did not.
 
-That's the whole core project. No ACI, no live hardware, no three-phase math required.
+No hardware, but connects directly to what an ACI is. 
 
 ## Architecture
 
 ```
-data/topology.yaml ──► build a graph (NetworkX) ──► two kinds of connection:
+data/topology.yaml ──► build a graph ──► two kinds of connection:
                                                       network links + power links
                                                               │
                                     pick a node/link to remove, recheck connectivity
@@ -55,7 +55,7 @@ data/topology.yaml ──► build a graph (NetworkX) ──► two kinds of con
                          - what went fully down
                                     │
                                     ▼
-                      hosted as a tiny web page on Azure App Service (F1, free tier)
+                      hosted as a tiny web page on Azure App Service (F1, free tier) using FastAPI or Flask
 ```
 
 ## Who works on what (core scope)
@@ -128,7 +128,7 @@ power:
 ```
 
 Simple on purpose: a handful of devices, two feeds, a few links. Prove the idea works
-small before making it bigger.
+small before making it bigger. Then begin to make it bigger as day 4-7 progresses. 
 
 ## Getting started (planned)
 
@@ -148,7 +148,7 @@ python -m twin simulate --topology data/topology.yaml --remove feedA
 python -m twin simulate --topology data/topology.yaml --remove core1 --draw
 ```
 
-Day 1 — Environment + topology skeleton
+Day 1 — Environment settling in, practice and skeleton of YAML and Python
 - Repo scaffold: venv, requirements.txt (matplotlib, pyyaml, pytest) — Zaheen (✅)
 - Learn plain-Python graph basics: adjacency list, remove a node, BFS/DFS reachability check — Zaheen (✅)
 - Pull real wattages for 5-8 sample devices (Cisco Power Calculator + datasheets) — Anas Shah (✅)
@@ -157,7 +157,7 @@ Day 2 — Finish data/topology.yaml
 - Write network_links for a 5-8 device topology, with one access switch deliberately given two uplinks ("backed up") — Zaheen (✅)
 - Write the power section: feeds A/B, capacity_kw, psu_links, N/N+1/2N — Anas Shah (✅)
 
-**Day 3 — Build the graph**
+**Day 3 — Build the graph and physical network topologies and practice break it virtually**
 - [ ]Merge both sections into one working YAML file — both 
 - [ ] Parse the YAML into a plain adjacency-list graph with two edge types (network
       link, power link), same node set — *Zaheen* (✅)
@@ -170,7 +170,7 @@ Day 2 — Finish data/topology.yaml
 - [ ] Recheck the power layer: do the surviving feeds still cover the device's load
       (still N/N+1/2N, or under-provisioned now)? — *Anas Shah*
 
-**Day 5 — Resilience report + the hidden SPOF**
+**Day 5 — Resilience report + the hidden SPOF (single point of failure)**
 - [ ] Classify each device's network status: fine / degraded / down by reachability —
       *Zaheen*
 - [ ] Classify each device's power status: fine / degraded / down by feed-capacity
@@ -183,14 +183,14 @@ Day 2 — Finish data/topology.yaml
 - [ ] Confirm the tool catches it: Zaheen writes the network-side test, Anas Shah writes
       the power-side test — *Zaheen + Anas Shah*
 
-**Day 6 — Visualization**
+**Day 6 — Visualization/Mapping out**
 - [ ] Simple manual layout (e.g. position by role: core/distribution/access as rows) since
       there's no graph library to auto-lay-out nodes — *Zaheen*
 - [ ] Status-to-color mapping (fine/degraded/down → green/yellow/red) — *Anas Shah*
 - [ ] Before/after picture with matplotlib, wiring the layout and colors together —
       *Zaheen, Anas Shah*
 
-**Day 7 — Azure deployment (AZ-900/104 practice)**
+**Day 7 — Azure deployment and FastAPI connections**
 - [ ] Create a resource group → App Service (F1 free tier) → deploy the report page, "mini dashboard" creation as well—
       *Zaheen*
 - [ ] Confirm logs in Azure Monitor / Log Stream — *Zaheen*
