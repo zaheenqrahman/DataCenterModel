@@ -1,40 +1,49 @@
 # ============================================================
-# Catalyst 9300 power settings
-# ============================================================
-
-device:
-  model: "C9300-24H (1100W-P)"
-  description: "24-port stackable Ethernet switch with PoE+ support and a 1100W AC power supply"
-  form_factor: "1RU"
-  port_count: 24
-  input_voltage: "115/230V AC"
-
-power:
-  consumption:
-    typical_power_w: 116.0
-    typical_heat_btu_hr: 439.77
-    max_switch_power_w: 240.0
-    max_heat_btu_hr: 909.87
-    poe_available_w: 830.0
-
-  psu_options:
-    primary: "PWR-C1-1100WAC-P"
-    alternate_models:
-      - model: "PWR-C1-350WAC-P="
-        total_poe_w: 1180.0
-      - model: "PWR-C1-715WAC-P="
-        total_poe_w: 1545.0
-      - model: "PWR-C1-1100WAC-P="
-        total_poe_w: 1930.0
-
-# ============================================================
-# Power distribution
+# Catalyst 9300 Power Settings and Distribution
 # Author: Anas Shah
 # ============================================================
-  infrastructure:
-    author: "Anas Shah"
-    redundancy_mode: "2N" # Supported: N, N+1, 2N
-    total_capacity_kw: 2.2 # Combined output of both 1100W PSUs
+
+infrastructure:
+  author: "Anas Shah"
+  environment: "Production"
+  redundancy_mode: "2N" # Supported: N, N+1, 2N
+  total_stack_devices: 5
+  total_capacity_kw: 11.0 # Aggregate capacity for 5 dual-1100W PSU switches (5 x 2.2 kW)
+  power_distribution:
+    source_pdus:
+      - id: "PDU-A-01"
+        voltage_vac: 230
+        status: "Active"
+      - id: "PDU-B-01"
+        voltage_vac: 230
+        status: "Active"
+
+device_inventory:
+  - id: "SW-01"
+    hostname: "cat9300-sw01"
+    device_info:
+      model: "C9300-24H (1100W-P)"
+      description: "24-port stackable Ethernet switch with UPoE+ support and an 1100W AC power supply"
+      form_factor: "1RU"
+      port_count: 24
+      input_voltage: "115/230V AC"
+
+    power_consumption:
+      typical_power_w: 116.0
+      typical_heat_btu_hr: 439.77
+      max_switch_power_w: 240.0
+      max_heat_btu_hr: 909.87
+      poe_available_w: 830.0
+
+    power_supplies:
+      primary: "PWR-C1-1100WAC-P"
+      alternate_models:
+        - model: "PWR-C1-350WAC-P="
+          total_poe_w: 1180.0
+        - model: "PWR-C1-715WAC-P="
+          total_poe_w: 1545.0
+        - model: "PWR-C1-1100WAC-P="
+          total_poe_w: 1930.0
 
     feeds:
       feed_a:
@@ -43,7 +52,214 @@ power:
         source_pdu: "PDU-A-01"
         psu_slot: "PSU1"
         psu_model: "PWR-C1-1100WAC-P"
+      feed_b:
+        status: "Active"
+        voltage_vac: 230
+        source_pdu: "PDU-B-01"
+        psu_slot: "PSU2"
+        psu_model: "PWR-C1-1100WAC-P"
 
+    psu_links:
+      - psu_id: "PSU-1"
+        feed: "A"
+        connected_pdu_port: "PDU-A-01:C13-01"
+        link_status: "Up"
+        power_supply_ref: "PWR-C1-1100WAC-P"
+      - psu_id: "PSU-2"
+        feed: "B"
+        connected_pdu_port: "PDU-B-01:C13-01"
+        link_status: "Up"
+        power_supply_ref: "PWR-C1-1100WAC-P"
+
+  - id: "SW-02"
+    hostname: "cat9300-sw02"
+    device_info:
+      model: "C9300-24H (1100W-P)"
+      description: "24-port stackable Ethernet switch with UPoE+ support and an 1100W AC power supply"
+      form_factor: "1RU"
+      port_count: 24
+      input_voltage: "115/230V AC"
+
+    power_consumption:
+      typical_power_w: 116.0
+      typical_heat_btu_hr: 439.77
+      max_switch_power_w: 240.0
+      max_heat_btu_hr: 909.87
+      poe_available_w: 830.0
+
+    power_supplies:
+      primary: "PWR-C1-1100WAC-P"
+      alternate_models:
+        - model: "PWR-C1-350WAC-P="
+          total_poe_w: 1180.0
+        - model: "PWR-C1-715WAC-P="
+          total_poe_w: 1545.0
+        - model: "PWR-C1-1100WAC-P="
+          total_poe_w: 1930.0
+
+    feeds:
+      feed_a:
+        status: "Active"
+        voltage_vac: 230
+        source_pdu: "PDU-A-01"
+        psu_slot: "PSU1"
+        psu_model: "PWR-C1-1100WAC-P"
+      feed_b:
+        status: "Active"
+        voltage_vac: 230
+        source_pdu: "PDU-B-01"
+        psu_slot: "PSU2"
+        psu_model: "PWR-C1-1100WAC-P"
+
+    psu_links:
+      - psu_id: "PSU-1"
+        feed: "A"
+        connected_pdu_port: "PDU-A-01:C13-02"
+        link_status: "Up"
+        power_supply_ref: "PWR-C1-1100WAC-P"
+      - psu_id: "PSU-2"
+        feed: "B"
+        connected_pdu_port: "PDU-B-01:C13-02"
+        link_status: "Up"
+        power_supply_ref: "PWR-C1-1100WAC-P"
+
+  - id: "SW-03"
+    hostname: "cat9300-sw03"
+    device_info:
+      model: "C9300-24H (1100W-P)"
+      description: "24-port stackable Ethernet switch with UPoE+ support and an 1100W AC power supply"
+      form_factor: "1RU"
+      port_count: 24
+      input_voltage: "115/230V AC"
+
+    power_consumption:
+      typical_power_w: 116.0
+      typical_heat_btu_hr: 439.77
+      max_switch_power_w: 240.0
+      max_heat_btu_hr: 909.87
+      poe_available_w: 830.0
+
+    power_supplies:
+      primary: "PWR-C1-1100WAC-P"
+      alternate_models:
+        - model: "PWR-C1-350WAC-P="
+          total_poe_w: 1180.0
+        - model: "PWR-C1-715WAC-P="
+          total_poe_w: 1545.0
+        - model: "PWR-C1-1100WAC-P="
+          total_poe_w: 1930.0
+
+    feeds:
+      feed_a:
+        status: "Active"
+        voltage_vac: 230
+        source_pdu: "PDU-A-01"
+        psu_slot: "PSU1"
+        psu_model: "PWR-C1-1100WAC-P"
+      feed_b:
+        status: "Active"
+        voltage_vac: 230
+        source_pdu: "PDU-B-01"
+        psu_slot: "PSU2"
+        psu_model: "PWR-C1-1100WAC-P"
+
+    psu_links:
+      - psu_id: "PSU-1"
+        feed: "A"
+        connected_pdu_port: "PDU-A-01:C13-03"
+        link_status: "Up"
+        power_supply_ref: "PWR-C1-1100WAC-P"
+      - psu_id: "PSU-2"
+        feed: "B"
+        connected_pdu_port: "PDU-B-01:C13-03"
+        link_status: "Up"
+        power_supply_ref: "PWR-C1-1100WAC-P"
+
+  - id: "SW-04"
+    hostname: "cat9300-sw04"
+    device_info:
+      model: "C9300-24H (1100W-P)"
+      description: "24-port stackable Ethernet switch with UPoE+ support and an 1100W AC power supply"
+      form_factor: "1RU"
+      port_count: 24
+      input_voltage: "115/230V AC"
+
+    power_consumption:
+      typical_power_w: 116.0
+      typical_heat_btu_hr: 439.77
+      max_switch_power_w: 240.0
+      max_heat_btu_hr: 909.87
+      poe_available_w: 830.0
+
+    power_supplies:
+      primary: "PWR-C1-1100WAC-P"
+      alternate_models:
+        - model: "PWR-C1-350WAC-P="
+          total_poe_w: 1180.0
+        - model: "PWR-C1-715WAC-P="
+          total_poe_w: 1545.0
+        - model: "PWR-C1-1100WAC-P="
+          total_poe_w: 1930.0
+
+    feeds:
+      feed_a:
+        status: "Active"
+        voltage_vac: 230
+        source_pdu: "PDU-A-01"
+        psu_slot: "PSU1"
+        psu_model: "PWR-C1-1100WAC-P"
+      feed_b:
+        status: "Active"
+        voltage_vac: 230
+        source_pdu: "PDU-B-01"
+        psu_slot: "PSU2"
+        psu_model: "PWR-C1-1100WAC-P"
+
+    psu_links:
+      - psu_id: "PSU-1"
+        feed: "A"
+        connected_pdu_port: "PDU-A-01:C13-04"
+        link_status: "Up"
+        power_supply_ref: "PWR-C1-1100WAC-P"
+      - psu_id: "PSU-2"
+        feed: "B"
+        connected_pdu_port: "PDU-B-01:C13-04"
+        link_status: "Up"
+        power_supply_ref: "PWR-C1-1100WAC-P"
+
+  - id: "SW-05"
+    hostname: "cat9300-sw05"
+    device_info:
+      model: "C9300-24H (1100W-P)"
+      description: "24-port stackable Ethernet switch with UPoE+ support and an 1100W AC power supply"
+      form_factor: "1RU"
+      port_count: 24
+      input_voltage: "115/230V AC"
+
+    power_consumption:
+      typical_power_w: 116.0
+      typical_heat_btu_hr: 439.77
+      max_switch_power_w: 240.0
+      max_heat_btu_hr: 909.87
+      poe_available_w: 830.0
+
+    power_supplies:
+      primary: "PWR-C1-1100WAC-P"
+      alternate_models:
+        - model: "PWR-C1-350WAC-P="
+          total_poe_w: 1180.0
+        - model: "PWR-C1-715WAC-P="
+          total_poe_w: 1545.0
+        - model: "PWR-C1-1100WAC-P="
+          total_poe_w: 1930.0
+
+    feeds:
+      feed_a:
+        status: "Active"
+        voltage_vac: 230
+        source_pdu: "PDU-A-01"
+        psu_slot: "PSU1"
+        psu_model: "PWR-C1-1100WAC-P"
       feed_b:
         status: "Active"
         voltage_vac: 230
@@ -57,7 +273,6 @@ power:
         connected_pdu_port: "PDU-A-01:C13-05"
         link_status: "Up"
         power_supply_ref: "PWR-C1-1100WAC-P"
-
       - psu_id: "PSU-2"
         feed: "B"
         connected_pdu_port: "PDU-B-01:C13-05"
