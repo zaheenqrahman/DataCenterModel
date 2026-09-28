@@ -60,12 +60,14 @@ data/topology.yaml ──► build a graph (NetworkX) ──► two kinds of con
 
 ## Who works on what (core scope)
 
-| | Networking (CCNA-level) | Power (EE, sophomore-level) |
+| | Networking (Zaheen, CCNA-level) | Power (Anas Shah, EE, sophomore-level) |
 |---|---|---|
 | **Knowledge needed** | Basic topology (core/distribution/access or spine-leaf, from CCNA ch. 52), what redundancy means (two uplinks), reading/writing YAML | Ohm's law (`P = VI`), series/parallel circuits, what "two power feeds" means for redundancy (all from Physics 2) |
-| **New but small** | NetworkX basics: build a graph, remove a node, check if it's still connected | Redundancy models in plain terms: two feeds (2N) vs. one feed with a spare (N+1) |
-| **Owns in this repo** | `network_links` in the YAML, the graph-building code, the CCNA talking points for the demo | `power` section in the YAML (feeds, which device plugs into which), realistic wattage numbers |
+| **New but small** | Plain-Python graph basics: adjacency list, remove a node, BFS/DFS to check if it's still connected | Redundancy models in plain terms: two feeds (2N) vs. one feed with a spare (N+1) |
+| **Owns in this repo** | `network_links` in the YAML, the graph-building code, the CCNA talking points for the demo | `power` section in the YAML, realistic wattage numbers, *and* the power-side logic: capacity checks after a failure, N/N+1/2N classification |
+| **Cert tie-in** | CCNA: two-tier core/access design; the deliberate second uplink is a real-world talking point for STP/EtherChannel; `core1`/`core2` redundancy maps to HSRP/VRRP first-hop redundancy (not implemented — just talking points for the interview) | Not cert-tracked — this is Physics 2 / circuits coursework, not a certification |
 | **Stretch (optional, do the core first)** | Map nodes to ACI concepts (tenant/VRF/EPG) for the interview story | Power factor, three-phase power, or an ODE-based battery-discharge model |
+
 
 ## Tools for the power/electrical side
 
