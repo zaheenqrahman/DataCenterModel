@@ -156,12 +156,12 @@ python -m twin simulate --topology data/topology.yaml --remove core1 --draw
 
 Day 1 — Environment + topology skeleton
 - Repo scaffold: venv, requirements.txt (matplotlib, pyyaml, pytest) — Zaheen (✅)
-- Learn plain-Python graph basics: adjacency list, remove a node, BFS/DFS reachability check — Zaheen 
-- Pull real wattages for 5-8 sample devices (Cisco Power Calculator + datasheets) — Anas Shah
+- Learn plain-Python graph basics: adjacency list, remove a node, BFS/DFS reachability check — Zaheen (✅)
+- Pull real wattages for 5-8 sample devices (Cisco Power Calculator + datasheets) — Anas Shah (✅)
 
 Day 2 — Finish data/topology.yaml
 - Write network_links for a 5-8 device topology, with one access switch deliberately given two uplinks ("backed up") — Zaheen
-- Write the power section: feeds A/B, capacity_kw, psu_links, N/N+1/2N — Anas Shah
+- Write the power section: feeds A/B, capacity_kw, psu_links, N/N+1/2N — Anas Shah (✅)
 - Merge both sections into one working YAML file — both
 
 Day 3 — Build the graph
