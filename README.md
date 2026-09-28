@@ -1,4 +1,4 @@
-# dc-resilience-twin
+# DC-Resilience-Twin/Model
 
 **A small tool that maps a data center's network and its power together, then simulates
 "what if this one thing breaks?"**
