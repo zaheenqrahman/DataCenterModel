@@ -1,0 +1,102 @@
+import yaml
+import matplotlib.pyplot as plt
+import networkx as nx
+
+def generate_topology_from_yaml(yaml_path):
+    # Load configuration from YAML
+    with open(yaml_path, 'r') as file:
+        config = yaml.safe_load(file)
+
+    # Initialize Directed Graph
+    G = nx.DiGraph()
+
+    # Extract infrastructure metadata
+    infra = config.get('infrastructure', {})
+    author = infra.get('author', 'Unknown')
+    mode = infra.get('redundancy_mode', 'Unknown')
+    stack_devices = infra.get('total_stack_devices', 0)
+    aggregate_capacity = infra.get('total_capacity_kw', 0.0)
+    
+    # Calculate total PoE available across all devices
+    total_poe_w = sum(dev['power_consumption'].get('poe_available_w', 0) for dev in config.get('devices', []))
+
+    # Identify PDUs from the first device's feed configuration
+    first_dev_feeds = config['devices'][0]['feeds']
+    pdu_a_name = first_dev_feeds['feed_a']['source_pdu']
+    pdu_b_name = first_dev_feeds['feed_b']['source_pdu']
+    
+    pdu_a_node = f"{pdu_a_name}\n(Feed A / 230V)"
+    pdu_b_node = f"{pdu_b_name}\n(Feed B / 230V)"
+
+    G.add_node(pdu_a_node, color='#1e88e5', size=4000)
+    G.add_node(pdu_b_node, color='#e53935', size=4000)
+
+    # Process devices and their links
+    pos = {pdu_a_node: (-3, 6), pdu_b_node: (3, 6)}
+    switches = []
+
+    for i, device in enumerate(config.get('devices', [])):
+        sw_name = device['name']
+        model = device['device_info']['model'].split()[0]
+        sw_node = f"{sw_name}\n{model}"
+        switches.append(sw_node)
+        
+        G.add_node(sw_node, color='#4caf50', size=3500)
+        pos[sw_node] = (-6 + ((i + 1) * 2.4), 2)
+
+        # Process PSU Links for edges
+        for link in device.get('psu_links', []):
+            feed_type = link['feed']
+            pdu_port = link['connected_pdu_port'].split(':')[1]
+            psu_id = link['psu_id']
+            edge_label = f"{pdu_port} -> {psu_id}"
+
+            if feed_type == 'A':
+                G.add_edge(pdu_a_node, sw_node, label=edge_label, feed='A')
+            elif feed_type == 'B':
+                G.add_edge(pdu_b_node, sw_node, label=edge_label, feed='B')
+
+    # Plot Settings
+    plt.figure(figsize=(14, 8), facecolor='#f8f9fa')
+    plt.title(f"Catalyst 9300 Stack - {mode} Power Distribution Topology", fontsize=15, fontweight='bold', pad=25)
+
+    node_colors = [G.nodes[node]['color'] for node in G.nodes()]
+    node_sizes = [G.nodes[node]['size'] for node in G.nodes()]
+
+    # Draw Nodes & Labels
+    nx.draw_networkx_nodes(G, pos, node_color=node_colors, node_size=node_sizes, edgecolors='black', linewidths=1.5)
+    nx.draw_networkx_labels(G, pos, font_size=9, font_weight="bold", font_color="white")
+
+    # Draw Edges conditionally based on Feed metadata
+    edges_a = [(u, v) for u, v, d in G.edges(data=True) if d.get('feed') == 'A']
+    edges_b = [(u, v) for u, v, d in G.edges(data=True) if d.get('feed') == 'B']
+
+    nx.draw_networkx_edges(G, pos, edgelist=edges_a, edge_color='#1e88e5', width=2.5, arrows=True, arrowsize=18, connectionstyle="arc3,rad=-0.08")
+    nx.draw_networkx_edges(G, pos, edgelist=edges_b, edge_color='#e53935', width=2.5, arrows=True, arrowsize=18, connectionstyle="arc3,rad=0.08")
+
+    # Draw Edge Port Labels
+    edge_labels = nx.get_edge_attributes(G, 'label')
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=8, label_pos=0.65, bbox=dict(facecolor='white', edgecolor='none', alpha=0.8, pad=1))
+
+    # Dynamic Infrastructure Telemetry Overlay
+    stats_text = (
+        "Infrastructure Metadata:\n"
+        "-------------------------\n"
+        f"Author: {author}\n"
+        f"Redundancy Mode: {mode}\n"
+        f"Stack Total Devices: {stack_devices}\n"
+        f"Aggregate Capacity: {aggregate_capacity} kW\n"
+        f"Available PoE: {total_poe_w:,.0f} W"
+    )
+    plt.text(-6.5, 6.8, stats_text, fontsize=9.5, family='monospace', bbox=dict(facecolor='white', alpha=0.9, edgecolor='#cccccc', boxstyle='round,pad=0.6'))
+
+    # Save Output
+    plt.axis('off')
+    plt.tight_layout()
+    plt.savefig('dynamic_topology.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    print("Successfully generated: dynamic_topology.png")
+
+if __name__ == "__main__":
+    # Ensure your YAML file is saved as 'topology.yaml' in the same directory
+    generate_topology_from_yaml('topology.yaml')
