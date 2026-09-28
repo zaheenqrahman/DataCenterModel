@@ -155,8 +155,8 @@ python -m twin simulate --topology data/topology.yaml --remove core1 --draw
 ```
 
 Day 1 — Environment + topology skeleton
-- Repo scaffold: venv, requirements.txt (matplotlib, pyyaml, pytest) — Zaheen
-- Learn plain-Python graph basics: adjacency list, remove a node, BFS/DFS reachability check — Zaheen
+- Repo scaffold: venv, requirements.txt (matplotlib, pyyaml, pytest) — Zaheen (✅)
+- Learn plain-Python graph basics: adjacency list, remove a node, BFS/DFS reachability check — Zaheen 
 - Pull real wattages for 5-8 sample devices (Cisco Power Calculator + datasheets) — Anas Shah
 
 Day 2 — Finish data/topology.yaml
