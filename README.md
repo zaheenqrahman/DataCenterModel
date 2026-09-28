@@ -88,15 +88,8 @@ redundancy, writing the `power` section of the YAML. No specialized software nee
 
 | Tool | Why |
 |---|---|
-| [Falstad Circuit Simulator](https://www.falstad.com/circuit/) (browser, free) | See series/parallel circuits and Kirchhoff's laws animate, instead of only computing by hand |
 | Excel / Google Sheets | Sum rack wattages and feed loads by hand first, before encoding into YAML — catches mistakes early |
 
-**Only needed for the stretch goals:**
-
-| Tool | For |
-|---|---|
-| [LTspice](https://www.analog.com/en/resources/design-tools-and-calculators/ltspice-simulator.html) (free) | Actually simulating the UPS/battery discharge circuit instead of only solving the ODE symbolically |
-| `scipy.integrate.solve_ivp` (`pip install scipy`) | Solving the battery-discharge ODE numerically — no new tool, just a library, keeps everything in Python |
 
 ## Azure (AZ-900 / AZ-104 practice, built in, not bolted on)
 
@@ -111,10 +104,9 @@ not separate homework:
 | Put any secret (if one ever exists) in **Azure Key Vault**, not in code | AZ-104: secrets management |
 | Check the app's logs in **Azure Monitor / Log Stream** | AZ-104: monitoring basics |
 
-This is deliberately small — one App Service, one storage account, nothing that costs
-money on the free tier.
+One app service, resource group, storage account, front end is not needed
 
-## Data model (planned: `data/topology.yaml`)
+## Data model (planned: `data/topology.yaml`, will connect with power and network devices together)
 
 ```yaml
 devices:
@@ -162,17 +154,17 @@ Day 1 — Environment + topology skeleton
 - Pull real wattages for 5-8 sample devices (Cisco Power Calculator + datasheets) — Anas Shah (✅)
 
 Day 2 — Finish data/topology.yaml
-- Write network_links for a 5-8 device topology, with one access switch deliberately given two uplinks ("backed up") — Zaheen
+- Write network_links for a 5-8 device topology, with one access switch deliberately given two uplinks ("backed up") — Zaheen (✅)
 - Write the power section: feeds A/B, capacity_kw, psu_links, N/N+1/2N — Anas Shah (✅)
-- Merge both sections into one working YAML file — both
 
 **Day 3 — Build the graph**
+- [ ]Merge both sections into one working YAML file — both 
 - [ ] Parse the YAML into a plain adjacency-list graph with two edge types (network
-      link, power link), same node set — *Zaheen*
+      link, power link), same node set — *Zaheen* (✅)
 - [ ] Quick script/test that loads it and prints node/edge counts — *Anas Shah*
-- [ ] Map out Cisco Packet Tracer (devices) connected and simulate their errors through their failures (cyberattack, nature disaster, shutdown, etc).
+- [ ] Map out Cisco Packet Tracer (devices) connected and simulate their errors through their failures (cyberattack, natural disaster, shutdown, etc). 
 
-**Day 4 — Failure simulation**
+**Day 4 — Failure simulation day to test a specific failure situation, maybe also create an incident report**
 - [ ] Remove a node or link, recheck the network layer: still has a path to the internet
       node? — *Zaheen*
 - [ ] Recheck the power layer: do the surviving feeds still cover the device's load
@@ -196,10 +188,10 @@ Day 2 — Finish data/topology.yaml
       there's no graph library to auto-lay-out nodes — *Zaheen*
 - [ ] Status-to-color mapping (fine/degraded/down → green/yellow/red) — *Anas Shah*
 - [ ] Before/after picture with matplotlib, wiring the layout and colors together —
-      *Zaheen*
+      *Zaheen, Anas Shah*
 
 **Day 7 — Azure deployment (AZ-900/104 practice)**
-- [ ] Create a resource group → App Service (F1 free tier) → deploy the report page —
+- [ ] Create a resource group → App Service (F1 free tier) → deploy the report page, "mini dashboard" creation as well—
       *Zaheen*
 - [ ] Confirm logs in Azure Monitor / Log Stream — *Zaheen*
 - [ ] Sanity-check the deployed report: do the power numbers and the seeded SPOF match
