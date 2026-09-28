@@ -165,7 +165,7 @@ Day 3 — Build the graph and physical network topologies and practice breaking 
 [ ] Merge both sections into one working YAML file — both
 [ ]Parse the YAML into a plain adjacency-list graph with two edge types (network link, power link), same node set — Zaheen (✅)
 [ ] Quick script/test that loads it and prints node/edge counts — Anas Shah (semi done)
-[ ] Map out Cisco Packet Tracer (devices) connected and simulate their errors through their failures (cyberattack, natural disaster, shutdown, etc).
+[ ] Map out Cisco Packet Tracer (devices) connected and simulate their errors through their failures (cyberattack, natural disaster, shutdown, etc), configure it with Ansible if time - Zaheen
 
 Day 4 — Failure simulation day to test a specific failure situation, maybe also create an incident report
 
@@ -188,6 +188,7 @@ Day 6 — Visualization/Mapping out
  Status-to-color mapping (fine/degraded/down → green/yellow/red) — Anas Shah
  Show STP link state in the picture too (e.g. dashed line for the currently-blocked uplink) — Zaheen
  Before/after picture with matplotlib, wiring the layout and colors together — Zaheen, Anas Shah
+ Download Terraform, learn the layout, then provision it to  the azure app service instead hand doing it in Portal - Zaheen
 
 Day 7 — Azure deployment and FastAPI connections
 
