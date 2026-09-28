@@ -164,26 +164,49 @@ Day 2 — Finish data/topology.yaml
 - Write the power section: feeds A/B, capacity_kw, psu_links, N/N+1/2N — Anas Shah (✅)
 - Merge both sections into one working YAML file — both
 
-Day 3 — Build the graph
-- Parse the YAML into a plain adjacency-list graph with two edge types (network link, power link) — Zaheen
-- Quick script/test that loads it and prints node/edge counts — Zaheen
+**Day 3 — Build the graph**
+- [ ] Parse the YAML into a plain adjacency-list graph with two edge types (network
+      link, power link), same node set — *Zaheen*
+- [ ] Quick script/test that loads it and prints node/edge counts — *Anas Shah*
 
-Day 4 — Failure simulation
-- Remove a node or link, recheck each layer independently: still has a network path? still has power? — Zaheen
+**Day 4 — Failure simulation**
+- [ ] Remove a node or link, recheck the network layer: still has a path to the internet
+      node? — *Zaheen*
+- [ ] Recheck the power layer: do the surviving feeds still cover the device's load
+      (still N/N+1/2N, or under-provisioned now)? — *Anas Shah*
 
-Day 5 — Resilience report + the hidden SPOF
-- Classify every device as fine / degraded / down after a failure — Zaheen
-- Seed one deliberate hidden single point of failure (Anas Shah: power-side; Zaheen: network-side) — both
-- Confirm the tool catches it with a test — Zaheen
+**Day 5 — Resilience report + the hidden SPOF**
+- [ ] Classify each device's network status: fine / degraded / down by reachability —
+      *Zaheen*
+- [ ] Classify each device's power status: fine / degraded / down by feed-capacity
+      margin — *Anas Shah*
+- [ ] Combine both into one overall status per device — *Zaheen + Anas Shah*
+- [ ] Seed one deliberate hidden single point of failure in the sample data (Anas Shah
+      picks a power-side one — e.g. two feeds sharing an upstream circuit; Zaheen picks a
+      network-side one — e.g. two uplinks terminating on the same core switch) — *Zaheen +
+      Anas Shah*
+- [ ] Confirm the tool catches it: Zaheen writes the network-side test, Anas Shah writes
+      the power-side test — *Zaheen + Anas Shah*
 
-Day 6 — Visualization
-- Simple manual layout (position by role: co there's no graph library to auto-lay-outnodes — Zaheen
-- Before/after picture with matplotlib, colo — Zaheen
+**Day 6 — Visualization**
+- [ ] Simple manual layout (e.g. position by role: core/distribution/access as rows) since
+      there's no graph library to auto-lay-out nodes — *Zaheen*
+- [ ] Status-to-color mapping (fine/degraded/down → green/yellow/red) — *Anas Shah*
+- [ ] Before/after picture with matplotlib, wiring the layout and colors together —
+      *Zaheen*
 
-Day 7 — Azure deployment (AZ-900/104 practic
-- Resource group → App Service (F1 free tier) → deploy the report page — Zaheen
-- Confirm logs in Azure Monitor / Log Stream
-- Tick off remaining checkboxes, dry-run the demo, jot CCNA/AZ-900 talking points — Zaheen
+**Day 7 — Azure deployment (AZ-900/104 practice)**
+- [ ] Create a resource group → App Service (F1 free tier) → deploy the report page —
+      *Zaheen*
+- [ ] Confirm logs in Azure Monitor / Log Stream — *Zaheen*
+- [ ] Sanity-check the deployed report: do the power numbers and the seeded SPOF match
+      what went into the YAML? — *Anas Shah*
+- [ ] Tick off remaining checkboxes, dry-run the demo, jot CCNA/AZ-900 talking points for
+      the interview — e.g. the second uplink is normally handled by STP/EtherChannel in
+      real L2 designs, and `core1`/`core2` would normally run HSRP/VRRP for first-hop
+      redundancy; explain why this twin models both as plain parallel paths instead —
+      *Zaheen*
+
 
 ## Roadmap
 
