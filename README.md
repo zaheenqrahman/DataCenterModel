@@ -154,6 +154,37 @@ python -m twin simulate --topology data/topology.yaml --remove feedA
 python -m twin simulate --topology data/topology.yaml --remove core1 --draw
 ```
 
+Day 1 — Environment + topology skeleton
+- Repo scaffold: venv, requirements.txt (matplotlib, pyyaml, pytest) — Zaheen
+- Learn plain-Python graph basics: adjacency list, remove a node, BFS/DFS reachability check — Zaheen
+- Pull real wattages for 5-8 sample devices (Cisco Power Calculator + datasheets) — Anas Shah
+
+Day 2 — Finish data/topology.yaml
+- Write network_links for a 5-8 device topology, with one access switch deliberately given two uplinks ("backed up") — Zaheen
+- Write the power section: feeds A/B, capacity_kw, psu_links, N/N+1/2N — Anas Shah
+- Merge both sections into one working YAML file — both
+
+Day 3 — Build the graph
+- Parse the YAML into a plain adjacency-list graph with two edge types (network link, power link) — Zaheen
+- Quick script/test that loads it and prints node/edge counts — Zaheen
+
+Day 4 — Failure simulation
+- Remove a node or link, recheck each layer independently: still has a network path? still has power? — Zaheen
+
+Day 5 — Resilience report + the hidden SPOF
+- Classify every device as fine / degraded / down after a failure — Zaheen
+- Seed one deliberate hidden single point of failure (Anas Shah: power-side; Zaheen: network-side) — both
+- Confirm the tool catches it with a test — Zaheen
+
+Day 6 — Visualization
+- Simple manual layout (position by role: co there's no graph library to auto-lay-outnodes — Zaheen
+- Before/after picture with matplotlib, colo — Zaheen
+
+Day 7 — Azure deployment (AZ-900/104 practic
+- Resource group → App Service (F1 free tier) → deploy the report page — Zaheen
+- Confirm logs in Azure Monitor / Log Stream
+- Tick off remaining checkboxes, dry-run the demo, jot CCNA/AZ-900 talking points — Zaheen
+
 ## Roadmap
 
 **Core (build this first)**
