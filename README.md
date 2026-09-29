@@ -4,23 +4,7 @@
 "what if this one thing breaks?"**
 
 
-## Scope
 
-This project is built for exactly where we are right now, not for an ideal team:
-
-- **Zaheen** is studying for the **CCNA** and interviewing for a Cisco Data Center
-  Consulting internship — so the networking side stays at CCNA level (no ACI, no
-  advanced SDN). It's meant to show CCNA fundamentals applied, not a whole new platform
-  alongside automation, hybrid cloud deployment and APIs. 
-- **The power/electrical side** is a sophomore who's taken **Physics 2 (+ lab), Calc 2,
-  Calc 3, Diff Eq, and intro Python** — so that side stays at "Ohm's law and basic
-  redundancy," not full power-systems engineering.
-- **Azure** is included because Zaheen is studying for **AZ-900 / AZ-104** — deploying
-  this project is real, graded practice for that, not an add-on.
-
-Everything past that (three-phase power, ACI's tenant/VRF/EPG model, ODE-based battery
-modeling) is listed as **stretch**, clearly separate from the core build. Do the core
-first. It's still a real, working project without any of the stretch items.
 
 ## What it actually does (core version)
 
@@ -59,10 +43,7 @@ data/topology.yaml ──► build a graph ──► two kinds of connection:
 ```
 
 ## Who works on what (core scope)
-
-| | Networking (Zaheen, CCNA-level) | Power (Anas Shah, EE, sophomore-level) |
-|---|---|---|
-| **Knowledge needed** | Basic topology (core/distribution/access or spine-leaf, from CCNA ch. 52), what redundancy means (two uplinks), reading/writing YAML | Ohm's law (`P = VI`), series/parallel circuits, what "two power feeds" means for redundancy (all from Physics 2) |
+|
 | **New but small** | Plain-Python graph basics: adjacency list, remove a node, BFS/DFS to check if it's still connected | Redundancy models in plain terms: two feeds (2N) vs. one feed with a spare (N+1) |
 | **Owns in this repo** | `network_links` in the YAML, the graph-building code, the CCNA talking points for the demo | `power` section in the YAML, realistic wattage numbers, *and* the power-side logic: capacity checks after a failure, N/N+1/2N classification |
 | **Cert tie-in** | CCNA: two-tier core/access design; the deliberate second uplink is a real-world talking point for STP/EtherChannel; `core1`/`core2` redundancy maps to HSRP/VRRP first-hop redundancy (not implemented — just talking points for the interview) | Not cert-tracked — this is Physics 2 / circuits coursework, not a certification |
@@ -81,8 +62,8 @@ data/topology.yaml ──► build a graph ──► two kinds of connection:
 | [Cisco Power Calculator](https://cpc.cloudapps.cisco.com/cpc/) | Real device wattages instead of placeholders | Free |
 | A device datasheet (search "[model] power specifications" on cisco.com) | Backs up the Power Calculator numbers with actual PSU ratings | Free |
 
-That's everything required for the core scope: real wattages, understanding N/N+1/2N
-redundancy, writing the `power` section of the YAML. No specialized software needed.
+
+ writing the `power` section of the YAML. No specialized software needed.
 
 **Recommended, not required (builds intuition):**
 
@@ -91,12 +72,8 @@ redundancy, writing the `power` section of the YAML. No specialized software nee
 | Excel / Google Sheets | Sum rack wattages and feed loads by hand first, before encoding into YAML — catches mistakes early |
 
 
-## Azure (AZ-900 / AZ-104 practice, built in, not bolted on)
 
-The whole point of including Azure here is that deploying this *is* AZ-900/104 material,
-not separate homework:
-
-| Step | What you're actually practicing |
+| Azure |
 |---|---|
 | Create a resource group | AZ-900: how Azure organizes resources |
 | Deploy the report as a tiny web page on **Azure App Service (F1, free tier)** | AZ-900: PaaS vs. IaaS vs. SaaS — App Service is PaaS, no server to manage |
@@ -235,12 +212,4 @@ project: a FastAPI health/compliance API over a similar shared network+power mod
 project asks "is this compliant right now?"; this one asks "what breaks if this fails?"
 Built and delivered separately.
 
-## Secrets
 
-No credentials needed for the core, local version. Once anything is hosted on Azure,
-connection strings and any keys go in **Azure Key Vault** or environment variables —
-never in `data/topology.yaml` or committed code.
-
-## Authors
-
-Zaheen Rahman (networking + Azure side) + power/electrical engineering partner Anas Shah
