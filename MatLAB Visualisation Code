@@ -1,0 +1,138 @@
+% Catalyst 9300 Power Settings and Distribution/Calculations
+% Author: Anas Shah
+
+% infrastructure:
+  infrastructure.author = "Anas Shah";
+  infrastructure.environment = "Production";
+  infrastructure.redundancy_mode = "2N"; % redundancy models: N, N+1, 2N
+  infrastructure.total_stack_devices = 5;
+  infrastructure.total_capacity_kw = 11.0; % for 5 dual-1100W PSU switches (5 x 2.2 kW)
+  % power_distribution:
+    % source_pdus:
+      % - 
+        infrastructure.power_distribution.source_pdus(1).id = "PDU-A-01";
+        infrastructure.power_distribution.source_pdus(1).voltage_vac = 230;
+        infrastructure.power_distribution.source_pdus(1).status = "Active";
+      % - 
+        infrastructure.power_distribution.source_pdus(2).id = "PDU-B-01";
+        infrastructure.power_distribution.source_pdus(2).voltage_vac = 230;
+        infrastructure.power_distribution.source_pdus(2).status = "Active";
+
+% all 5 switches are the same model but are different in power consumption
+% device_types:
+  % C9300-24H:
+    device_types.C9300_24H.model = "C9300-24H (1100W-P)";
+    device_types.C9300_24H.description = "24-port stackable Ethernet switch with UPoE+ support and an 1100W AC power supply";
+    device_types.C9300_24H.form_factor = "1RU";
+    device_types.C9300_24H.port_count = 24;
+    device_types.C9300_24H.input_voltage = "115/230V AC";
+
+    % power_consumption:
+      device_types.C9300_24H.power_consumption.typical_power_w = 116.0;
+      % btu is standard unit of measurement for heat energy per hour
+      device_types.C9300_24H.power_consumption.typical_heat_btu_hr = 439.77;
+      device_types.C9300_24H.power_consumption.max_switch_power_w = 240.0;
+      device_types.C9300_24H.power_consumption.max_heat_btu_hr = 909.87;
+      device_types.C9300_24H.power_consumption.poe_available_w = 830.0;
+
+    % power_supplies:
+      device_types.C9300_24H.power_supplies.primary = "PWR-C1-1100WAC-P";
+      % alternate_models:
+        % - 
+          device_types.C9300_24H.power_supplies.alternate_models(1).model = "PWR-C1-350WAC-P=";
+          device_types.C9300_24H.power_supplies.alternate_models(1).total_poe_w = 1180.0;
+        % - 
+          device_types.C9300_24H.power_supplies.alternate_models(2).model = "PWR-C1-715WAC-P=";
+          device_types.C9300_24H.power_supplies.alternate_models(2).total_poe_w = 1545.0;
+        % - 
+          device_types.C9300_24H.power_supplies.alternate_models(3).model = "PWR-C1-1100WAC-P=";
+          device_types.C9300_24H.power_supplies.alternate_models(3).total_poe_w = 1930.0;
+
+    % PSU1 goes into feed while PSU2 goes into feedb (2n power design, indepedent power supplies)
+    % feeds:
+      % feed_a:
+        device_types.C9300_24H.feeds.feed_a.status = "Active";
+        device_types.C9300_24H.feeds.feed_a.voltage_vac = 230;
+        device_types.C9300_24H.feeds.feed_a.source_pdu = "PDU-A-01";
+        device_types.C9300_24H.feeds.feed_a.psu_slot = "PSU1";
+        device_types.C9300_24H.feeds.feed_a.psu_model = "PWR-C1-1100WAC-P";
+      % feed_b:
+        device_types.C9300_24H.feeds.feed_b.status = "Active";
+        device_types.C9300_24H.feeds.feed_b.voltage_vac = 230;
+        device_types.C9300_24H.feeds.feed_b.source_pdu = "PDU-B-01";
+        device_types.C9300_24H.feeds.feed_b.psu_slot = "PSU2";
+        device_types.C9300_24H.feeds.feed_b.psu_model = "PWR-C1-1100WAC-P";
+
+% each power supply/switch feeds into a different port which will consume a different amount
+% of power , this is all it changes and is needed to simplify down
+% device_inventory:
+  % - 
+    device_inventory(1).id = "SW-01";
+    device_inventory(1).hostname = "cat9300-sw01";
+    device_inventory(1).type = "C9300-24H";
+    % psu_links:
+      % - 
+      device_inventory(1).psu_links(1) = struct('psu_id', "PSU-1", 'feed', "A", 'connected_pdu_port', "PDU-A-01:C13-01", 'link_status', "Run");
+      % - 
+      device_inventory(1).psu_links(2) = struct('psu_id', "PSU-2", 'feed', "B", 'connected_pdu_port', "PDU-B-01:C13-01", 'link_status', "Run");
+
+  % - 
+    device_inventory(2).id = "SW-02";
+    device_inventory(2).hostname = "cat9300-sw02";
+    device_inventory(2).type = "C9300-24H";
+    % psu_links:
+      % - 
+      device_inventory(2).psu_links(1) = struct('psu_id', "PSU-1", 'feed', "A", 'connected_pdu_port', "PDU-A-01:C13-02", 'link_status', "Run");
+      % - 
+      device_inventory(2).psu_links(2) = struct('psu_id', "PSU-2", 'feed', "B", 'connected_pdu_port', "PDU-B-01:C13-02", 'link_status', "Run");
+
+  % - 
+    device_inventory(3).id = "SW-03";
+    device_inventory(3).hostname = "cat9300-sw03";
+    device_inventory(3).type = "C9300-24H";
+    % psu_links:
+      % - 
+      device_inventory(3).psu_links(1) = struct('psu_id', "PSU-1", 'feed', "A", 'connected_pdu_port', "PDU-A-01:C13-03", 'link_status', "Run");
+      % - 
+      device_inventory(3).psu_links(2) = struct('psu_id', "PSU-2", 'feed', "B", 'connected_pdu_port', "PDU-B-01:C13-03", 'link_status', "Run");
+
+  % - 
+    device_inventory(4).id = "SW-04";
+    device_inventory(4).hostname = "cat9300-sw04";
+    device_inventory(4).type = "C9300-24H";
+    % psu_links:
+      % - 
+      device_inventory(4).psu_links(1) = struct('psu_id', "PSU-1", 'feed', "A", 'connected_pdu_port', "PDU-A-01:C13-04", 'link_status', "Run");
+      % - 
+      device_inventory(4).psu_links(2) = struct('psu_id', "PSU-2", 'feed', "B", 'connected_pdu_port', "PDU-B-01:C13-04", 'link_status', "Run");
+
+  % - 
+    device_inventory(5).id = "SW-05";
+    device_inventory(5).hostname = "cat9300-sw05";
+    device_inventory(5).type = "C9300-24H";
+    % psu_links:
+      % - 
+      device_inventory(5).psu_links(1) = struct('psu_id', "PSU-1", 'feed', "A", 'connected_pdu_port', "PDU-A-01:C13-05", 'link_status', "Run");
+      % - 
+      device_inventory(5).psu_links(2) = struct('psu_id', "PSU-2", 'feed', "B", 'connected_pdu_port', "PDU-B-01:C13-05", 'link_status', "Run");
+
+% visualization & graphing based on exact parsed data above
+
+
+% extract data for charting
+switch_names = [device_inventory.id];
+p_typical = device_types.C9300_24H.power_consumption.typical_power_w;
+p_max_no_poe = device_types.C9300_24H.power_consumption.max_switch_power_w;
+p_poe = device_types.C9300_24H.power_consumption.poe_available_w;
+num_devices = infrastructure.total_stack_devices;
+
+power_matrix = repmat([p_typical, p_max_no_poe, p_max_no_poe + p_poe], num_devices, 1);
+
+% graphing
+figure('Name', 'Catalyst 9300 Power Metrics');
+bar(categorical(switch_names), power_matrix, 'grouped');
+title('Power Budget Distribution per Switch');
+xlabel('Device ID');
+ylabel('Power (Watts)');
+legend({'Typical Output (W)', 'Max Switch Allocation (No PoE)', 'Total Max Limit (Switch + PoE)'}, 'Location', 'northwest');
+grid on;
