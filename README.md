@@ -1,4 +1,4 @@
-# DC-Resilience-Twin/Model
+# Recreation of Data Center w/ Incident Response (Automatied)
 
 **A model/reflection that maps a data center's network and its power together, then simulates
 "what if this one thing breaks?"**
@@ -50,7 +50,7 @@ data/topology.yaml ──► build a graph ──► two kinds of connection:
 | **Stretch (optional, do the core first)** | Map nodes to ACI concepts (tenant/VRF/EPG) for the interview story | Power factor, three-phase power, or an ODE-based battery-discharge model |
 
 
-## Tools for the power/electrical side
+Tools: 
 
 **Core (need these to do the actual work):**
 
@@ -61,11 +61,9 @@ data/topology.yaml ──► build a graph ──► two kinds of connection:
 | Git / GitHub Desktop | Committing their part of the shared repo | Free |
 | [Cisco Power Calculator](https://cpc.cloudapps.cisco.com/cpc/) | Real device wattages instead of placeholders | Free |
 | A device datasheet (search "[model] power specifications" on cisco.com) | Backs up the Power Calculator numbers with actual PSU ratings | Free |
+writing the `power` section of the YAML
 
-
- writing the `power` section of the YAML. No specialized software needed.
-
-**Recommended, not required (builds intuition):**
+**To store data**
 
 | Tool | Why |
 |---|---|
@@ -207,9 +205,9 @@ Day 7 — Azure deployment and FastAPI connections
 
 ## Related work
 
-**PowerOps Gateway** (`datacenter-aci-blueprint` repo) — a separate, already-in-progress
+**PowerOps Gateway** (`datacenter-aci-blueprint` repo) — a separate, finished
 project: a FastAPI health/compliance API over a similar shared network+power model. That
 project asks "is this compliant right now?"; this one asks "what breaks if this fails?"
-Built and delivered separately.
+Built / delivered seperate..
 
 
