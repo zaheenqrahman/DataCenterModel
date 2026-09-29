@@ -136,11 +136,10 @@ Write the power section: feeds A/B, capacity_kw, psu_links, N/N+1/2N — Anas Sh
 
 Day 3 — Build the graph and physical network topologies and practice breaking it virtually
 
-[ ]Add IP/subnet per device and VLAN assignment for access-layer devices/servers; mark each network_link as trunk or access — Zaheen
-[ ] Merge both sections into one working YAML file — both
-[ ]Parse the YAML into a plain adjacency-list graph with two edge types (network link, power link), same node set — Zaheen (✅)
-[ ] Quick script/test that loads it and prints node/edge counts — Anas Shah (semi done)
-[ ] Map out Cisco Packet Tracer (devices) connected and simulate their errors through their failures (cyberattack, natural disaster, shutdown, etc), configure it with Ansible if time - Zaheen
+[ ]Add IP/subnet per device and VLAN assignment for access-layer devices/servers in Packet Tracer; mark each network_link as trunk or access, configure Bulk VLAN with ansible — Zaheen
+[✅] Merge both sections into one working YAML file — both
+[ ✅]Parse the YAML into a plain adjacency-list graph with two edge types (network link, power link), same node set — Zaheen (✅)
+[ ✅] Quick script/test that loads it and prints node/edge counts — Anas Shah 
 
 Day 4 — Failure simulation day to test a specific failure situation, maybe also create an incident report
 
