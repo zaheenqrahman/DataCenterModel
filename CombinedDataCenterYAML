@@ -1,0 +1,32 @@
+devices:
+  - {name: core1, role: core}
+  - {name: core2, role: core} # core layer is high capacity switch, two of them to test for failures
+  - {name: acc1,  role: access} # access layer is a switch in data center model
+  - {name: acc2,  role: access}
+  - {name: srv1,  role: server}
+  - {name: srv2,  role: server}
+  - {name: upstream, role: core} # upstream as to one network node connection for a placeholder
+
+
+network_links:
+  - [core1, upstream]
+  - [core2, upstream]   #upstream represents a point core switch layer connects to rest of network to see if device is reachable
+  - [acc1, core1]
+  - [acc1, core2]       # acts as backup second network link
+  - [acc2, core1]
+  - [acc2, core2]
+  - [srv1, acc1]
+  - [srv2, acc2]
+
+power:
+  # capacity numbers are from Catalyst 9300  (5x dual-1100W PSU switches, 2N Modes)
+  feeds:
+    A: {capacity_kw: 5.5} # updated power capacity in kilowats after calculations
+    B: {capacity_kw: 5.5}
+  psu_links:
+    - {device: core1, psu: A, feed: A}
+    - {device: core2, psu: A, feed: A}
+    - {device: acc1, psu: B, feed: B}
+    - {device: acc2, psu: A, feed: A}
+    - {device: srv1, psu: A, feed: A} # both servers are to same PSU and feed
+    - {device: srv2, psu: A, feed: A}
