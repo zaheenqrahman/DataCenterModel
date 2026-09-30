@@ -136,24 +136,34 @@ Write the power section: feeds A/B, capacity_kw, psu_links, N/N+1/2N — Anas Sh
 
 Day 3 — Build the graph and physical network topologies and practice breaking it virtually
 
-[ ]Add IP/subnet per device and VLAN assignment for access-layer devices/servers in Packet Tracer; mark each network_link as trunk or access, configure Bulk VLAN with ansible — Zaheen
+[ ✅]Add IP/subnet per device for access-layer devices/servers in Packet Tracer; mark each network_link as trunk or access — Zaheen
+
 [✅] Merge both sections into one working YAML file — both
+
 [ ✅]Parse the YAML into a plain adjacency-list graph with two edge types (network link, power link), same node set — Zaheen (✅)
+
 [ ✅] Quick script/test that loads it and prints node/edge counts — Anas Shah 
 
 Day 4 — Failure simulation day to test a specific failure situation, maybe also create an incident report
 
- Remove a node or link, recheck the network layer: still has a path to the internet node? — Zaheen
+ Remove a node or link, recheck the network layer: still has a path to the internet node? Also create the VLANS in cisco packet tracer update the switches if needed— Zaheen
+ 
  Recheck the power layer: do the surviving feeds still cover the device's load (still N/N+1/2N, or under-provisioned now)? — Anas Shah
+ 
  Model STP link state on acc1's two uplinks (one forwarding, one blocking); when the forwarding one fails, flip the blocked one to forwarding — Zaheen
+ 
  Model FHRP on core1/core2: active/standby with a priority value and a shared virtual gateway IP; standby takes over when active fails — Zaheen
 
 Day 5 — Resilience report + the hidden SPOF (single point of failure)
 
  Classify each device's network status: fine / degraded / down by reachability — Zaheen
+ 
  Classify each device's power status: fine / degraded / down by feed-capacity margin — Anas Shah
+ 
  Combine both into one overall status per device — Zaheen + Anas Shah
+ 
  Seed one deliberate hidden single point of failure in the sample data (Anas Shah picks a power-side one — e.g. two feeds sharing an upstream circuit; Zaheen picks a network-side one — e.g. two uplinks terminating on the same core switch) — Zaheen + Anas Shah
+ 
  Confirm the tool catches it: Zaheen writes the network-side test, Anas Shah writes the power-side test — Zaheen + Anas Shah
 
 Day 6 — Visualization/Mapping out
@@ -167,8 +177,11 @@ Day 6 — Visualization/Mapping out
 Day 7 — Azure deployment and FastAPI connections
 
  Create a resource group → App Service (F1 free tier) → deploy the report page, "mini dashboard" creation as well— Zaheen
+ 
  Confirm logs in Azure Monitor / Log Stream — Zaheen
+ 
  Sanity-check the deployed report: do the power numbers and the seeded SPOF match what went into the YAML? — Anas Shah
+ 
  Tick off remaining checkboxes, dry-run the demo, jot CCNA/AZ-104+900 talking points for the interview — e.g. walk through the STP failover and FHRP failover you actually built, not just describe them — Zaheen
 
 
