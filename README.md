@@ -146,7 +146,7 @@ Day 3 — Build the graph and physical network topologies and practice breaking 
 
 Day 4 — Failure simulation day to test a specific failure situation, maybe also create an incident report
 
- Remove a node or link, recheck the network layer: still has a path to the internet node? Also create the VLANS in cisco packet tracer update the switches if needed— Zaheen
+✅ Remove a node or link, recheck the network layer: still has a path to the internet node? Also create the VLANS in cisco packet tracer update the switches if needed, created trunk inter VLANS ✅— Zaheen
  
  Recheck the power layer: do the surviving feeds still cover the device's load (still N/N+1/2N, or under-provisioned now)? — Anas Shah
  
