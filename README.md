@@ -3,6 +3,54 @@
 **A model/reflection that maps a data center's network and its power together, then simulates
 "what if this one thing breaks?"**
 
+> Started as a team project with Anas Shah, who contributed the Catalyst 9300 power
+> calculations (`PowerCalculationsYML`, the MATLAB visualisation, and the PUE screenshot).
+> I'm continuing it on my own as a homelab project.
+
+## Status
+
+**Working now**
+- `model/topology.py` loads the YAML topology into a NetworkX graph.
+- `model/simulate.py` breaks devices, links, or power feeds and reports which devices are
+  still up, lost power, or are cut off from `upstream`.
+- It can try every single failure and list the single points of failure.
+- Tests: `tests/test_simulate.py` (13 tests).
+
+```bash
+pip install -r requirements.txt
+python -m model.simulate --all-single-failures
+python -m model.simulate --fail device:core1 --fail device:core2
+python -m pytest tests
+```
+
+Output on `DataCenterYAML`:
+
+```
+Single points of failure (everything must reach 'upstream'):
+  device:acc1              takes down: srv1
+  device:acc2              takes down: srv2
+  device:upstream          takes down: acc1, acc2, core1, core2, srv1, srv2
+  link:acc1-srv1           takes down: srv1
+  link:acc2-srv2           takes down: srv2
+```
+
+The two cores and the second uplinks do their job (losing one core takes nothing down).
+The weak spots are the access switches and server links, which have no backup.
+
+The model also reads an optional `power:` section (feeds and `psu_links`), so a shared feed
+that quietly takes out both cores can be found. The current `DataCenterYAML` has no power
+section yet, so power failures are only exercised in the tests for now.
+
+**Next**
+- Run the same failures on a Mininet network with an OpenFlow controller that reroutes on
+  link failure, and compare measured recovery time with this model.
+- Plan an automated incident response for the single points of failure.
+
+## Homelab
+
+The lab is hosted on a homelab server built from a refurbished desktop, running VirtualBox
+virtual machines. Docker and Kubernetes are planned additions, not part of the lab yet.
+
 
 
 
