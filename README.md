@@ -1,5 +1,4 @@
-# Recreation of Data Center w/ Incident Response (Automatied)
-
+# Recreation of Data Center w/ Incident Response 
 **A model/reflection that maps a data center's network and its power together, then simulates
 "what if this one thing breaks?"**
 
